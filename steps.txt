@@ -1,0 +1,92 @@
+Installations
+-----------------
+1.https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
+2.https://www.docker.com/products/docker-desktop/
+3.Install Intellij, Java, Maven, Install MongoDB
+
+Steps
+--------
+4. Create Azure MongoDB
+5. Connect Azure MongoDB from Local Springboot App
+6. Create Docker file to containerize Springboot App
+7. Maven clean install & Run docker command to create docker image
+docker build -t <image name>:<img version> .
+8. Create ACR & Tag local image to Azure Container Repo
+docker tag <image name>:<img version> mycontainerregistry.azurecr.io/<image name>:<img version>
+docker tag springbootaks:1.0.0 springbootaksrp.azurecr.io/springbootaks:1.0.0
+if we want to run
+docker run -p 8090:8080 mycontainerregistry.azurecr.io/<image name>:<img version>
+List all docker images
+docker images
+List all running & exited containers
+docker ps -a
+Kill a running container by using name
+docker kill my_container
+Remove docker image
+docker rmi mycontainerregistry.azurecr.io/<image name>:<img version>
+9. Login to Azure
+az login -> A page will open there enter your email and password
+10. Login to ACR
+az acr login --name mycontainerregistry
+11. Push image to ACR
+docker push mycontainerregistry.azurecr.io/<image name>:<img version>
+12. Set subscription
+az account set --subscription
+az account set --subscription 33b3a688-6f19-4cff-bb91-a412bd274551
+13. Get AKS credentials
+az aks get-credentials --resource-group --name
+az aks get-credentials --resource-group springboot-aks --name sprinbootakscluster
+14. Create Deployment Object
+kubectl create deployment <deployment name> --image=mycontainerregistry.azurecr.io/<image name>:<img version>
+kubectl create deployment springbootmongoaksdeployment --image=springbootaksrp.azurecr.io/springbootaks:1.0.0
+15. Get Pod
+kubectl get pod
+16. Get Pod logs
+kubectl logs <Pod Name>
+17. Craete Service object with the relevant deployment and expose it
+kubectl expose deployment <deployment name> --type=LoadBalancer --port=8080 —> this command to expose the service to 8080 port
+kubectl expose deployment springbootmongoaksdeployment --type=LoadBalancer --port=8080
+18. Get Service
+kubectl get services
+Now we should be able to see our app as service, one with load balancing IPs like cluster and external, we will use external IP to test the service
+http://<external IP>:8080/
+
+Get cluster info
+kubectl cluster-info
+
+Get info about the node
+kubectl get node
+
+Check a deployment
+kubectl get deployment
+
+Describe the deployment
+kubectl describe deployment <deployment name>
+kubectl describe deployment springbootmongoaksdeployment
+
+Command to create deployment from YAML file
+kubectl apply -f deployment.yml
+kubectl apply -f service.yml
+
+Delete a service
+kubectl delete svc <YourServiceName>
+
+https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer
+
+
+===================================================
+Dockerfile for Springboot
+
+FROM openjdk:11
+EXPOSE 8080
+ADD target/app.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
+Dockerfile for node app
+FROM node:alpine
+WORKDIR /usr/app
+COPY . .
+RUN npm install
+CMD ["npm","start"]

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-mongo-app
+  labels:
+    app: springboot-mongo-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-mongo-app
+  template:
+    metadata:
+      labels:
+        app: springboot-mongo-app
+    spec:
+      containers:
+        - name: springboot-mongo-app
+          image: springbootaksrp.azurecr.io/springbootaks:1.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
